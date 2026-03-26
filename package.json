@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "install:all": "cd backend && npm install",
-    "build": "cd backend && npx prisma generate && npx tsc",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install && npx prisma generate && npx tsc && npx tsc --esModuleInterop --skipLibCheck --outDir dist/seed --rootDir . prisma/seed.ts",
     "start": "cd backend && node dist/index.js",
     "dev": "cd backend && npx ts-node src/index.ts",
     "seed": "cd backend && npx ts-node prisma/seed.ts",
-    "migrate": "cd backend && npx prisma migrate deploy",
+    "migrate": "cd backend && npx prisma db push",
     "postinstall": "cd backend && npm install && npx prisma generate"
   }
 }
