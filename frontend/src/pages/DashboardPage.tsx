@@ -20,14 +20,13 @@ import { CSS } from '@dnd-kit/utilities';
 import {
   PlusCircle,
   GripVertical,
+  Edit,
   Trash2,
   Search,
   AlertTriangle,
-  Check,
-  X,
 } from 'lucide-react';
 import type { Slide, SlideType } from '../types';
-import { getSlides, deleteSlide, reorderSlides, toggleSlide, updateSlide } from '../services/api';
+import { getSlides, deleteSlide, reorderSlides, toggleSlide } from '../services/api';
 
 const SLIDE_TYPE_LABELS: Record<SlideType, string> = {
   news: 'Notícias',
@@ -53,22 +52,15 @@ const SLIDE_TYPE_COLORS: Record<SlideType, string> = {
 
 interface SortableSlideProps {
   slide: Slide;
+  onEdit: (id: number) => void;
   onDelete: (slide: Slide) => void;
   onToggle: (id: number) => void;
-  onUpdate: (id: number, data: Partial<Slide>) => void;
 }
 
-function SortableSlide({ slide, onDelete, onToggle, onUpdate }: SortableSlideProps) {
+function SortableSlide({ slide, onEdit, onDelete, onToggle }: SortableSlideProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slide.id,
   });
-
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [editingDuration, setEditingDuration] = useState(false);
-  const [editingType, setEditingType] = useState(false);
-  const [titleValue, setTitleValue] = useState(slide.title);
-  const [durationValue, setDurationValue] = useState(slide.duration);
-  const [typeValue, setTypeValue] = useState<SlideType>(slide.type);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -76,121 +68,24 @@ function SortableSlide({ slide, onDelete, onToggle, onUpdate }: SortableSlidePro
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const saveTitle = () => {
-    if (titleValue.trim() && titleValue !== slide.title) {
-      onUpdate(slide.id, { title: titleValue.trim() });
-    }
-    setEditingTitle(false);
-  };
-
-  const saveDuration = () => {
-    const val = Math.max(1, Math.min(300, durationValue));
-    if (val !== slide.duration) {
-      onUpdate(slide.id, { duration: val });
-    }
-    setEditingDuration(false);
-  };
-
-  const saveType = (newType: SlideType) => {
-    setTypeValue(newType);
-    if (newType !== slide.type) {
-      onUpdate(slide.id, { type: newType as any });
-    }
-    setEditingType(false);
-  };
-
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`grid grid-cols-[40px_140px_1fr_80px_60px_70px] items-center gap-3 px-3 py-2.5 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-        !slide.isActive ? 'opacity-50' : ''
+      className={`bg-white rounded-lg border border-gray-200 p-4 flex items-center gap-4 hover:shadow-md transition-shadow ${
+        !slide.isActive ? 'opacity-60' : ''
       }`}
     >
       {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 touch-none justify-self-center"
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 touch-none"
       >
-        <GripVertical size={16} />
+        <GripVertical size={20} />
       </button>
 
-      {/* Type badge - click to edit */}
-      {editingType ? (
-        <select
-          autoFocus
-          value={typeValue}
-          onChange={(e) => saveType(e.target.value as SlideType)}
-          onBlur={() => setEditingType(false)}
-          className="text-xs px-1 py-1 border border-cdf-300 rounded bg-white outline-none focus:ring-1 focus:ring-cdf-500"
-        >
-          {Object.entries(SLIDE_TYPE_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
-        </select>
-      ) : (
-        <button
-          onClick={() => setEditingType(true)}
-          className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer hover:ring-2 hover:ring-cdf-300 transition-all ${
-            SLIDE_TYPE_COLORS[slide.type]
-          }`}
-          title="Clique para editar tipo"
-        >
-          {SLIDE_TYPE_LABELS[slide.type]}
-        </button>
-      )}
-
-      {/* Title - click to edit */}
-      {editingTitle ? (
-        <div className="flex items-center gap-1">
-          <input
-            autoFocus
-            value={titleValue}
-            onChange={(e) => setTitleValue(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') saveTitle(); if (e.key === 'Escape') { setTitleValue(slide.title); setEditingTitle(false); } }}
-            className="flex-1 px-2 py-1 text-sm border border-cdf-300 rounded outline-none focus:ring-1 focus:ring-cdf-500"
-          />
-          <button onClick={saveTitle} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check size={14} /></button>
-          <button onClick={() => { setTitleValue(slide.title); setEditingTitle(false); }} className="p-1 text-gray-400 hover:bg-gray-100 rounded"><X size={14} /></button>
-        </div>
-      ) : (
-        <button
-          onClick={() => setEditingTitle(true)}
-          className="text-left text-sm text-gray-800 truncate hover:text-cdf-600 cursor-pointer"
-          title="Clique para editar título"
-        >
-          {slide.title}
-        </button>
-      )}
-
-      {/* Duration - click to edit */}
-      {editingDuration ? (
-        <div className="flex items-center gap-1">
-          <input
-            autoFocus
-            type="number"
-            min={1}
-            max={300}
-            value={durationValue}
-            onChange={(e) => setDurationValue(parseInt(e.target.value) || 1)}
-            onKeyDown={(e) => { if (e.key === 'Enter') saveDuration(); if (e.key === 'Escape') { setDurationValue(slide.duration); setEditingDuration(false); } }}
-            className="w-14 px-2 py-1 text-sm border border-cdf-300 rounded outline-none focus:ring-1 focus:ring-cdf-500 text-center"
-          />
-          <span className="text-xs text-gray-500">s</span>
-          <button onClick={saveDuration} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check size={14} /></button>
-        </div>
-      ) : (
-        <button
-          onClick={() => setEditingDuration(true)}
-          className="text-sm text-gray-600 hover:text-cdf-600 cursor-pointer text-center"
-          title="Clique para editar duração"
-        >
-          {slide.duration}s
-        </button>
-      )}
-
-      {/* Active toggle */}
+      {/* Active toggle - moved to beginning */}
       <button
         onClick={() => onToggle(slide.id)}
         className={`toggle-switch ${slide.isActive ? 'toggle-switch-checked' : 'toggle-switch-unchecked'}`}
@@ -199,14 +94,38 @@ function SortableSlide({ slide, onDelete, onToggle, onUpdate }: SortableSlidePro
         <span className={`toggle-dot ${slide.isActive ? 'toggle-dot-checked' : 'toggle-dot-unchecked'}`} />
       </button>
 
-      {/* Delete */}
-      <button
-        onClick={() => onDelete(slide)}
-        className="p-1.5 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors justify-self-center"
-        title="Eliminar"
+      {/* Type badge */}
+      <span
+        className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+          SLIDE_TYPE_COLORS[slide.type]
+        }`}
       >
-        <Trash2 size={16} />
-      </button>
+        {SLIDE_TYPE_LABELS[slide.type]}
+      </span>
+
+      {/* Title & Duration */}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium text-gray-800 truncate">{slide.title}</h3>
+        <p className="text-sm text-gray-500">{slide.duration}s</p>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onEdit(slide.id)}
+          className="p-2 text-gray-400 hover:text-cdf-600 hover:bg-cdf-50 rounded-lg transition-colors"
+          title="Editar"
+        >
+          <Edit size={18} />
+        </button>
+        <button
+          onClick={() => onDelete(slide)}
+          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          title="Eliminar"
+        >
+          <Trash2 size={18} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -270,15 +189,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleUpdate = async (id: number, data: Partial<Slide>) => {
-    try {
-      const updated = await updateSlide(id, data);
-      setSlides((prev) => prev.map((s) => (s.id === id ? updated : s)));
-    } catch {
-      // ignore
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -305,17 +215,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Pesquisar..."
+                placeholder="Pesquisar slides..."
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none"
               />
             </div>
           </div>
@@ -326,7 +236,9 @@ export default function DashboardPage() {
           >
             <option value="">Todos os tipos</option>
             {Object.entries(SLIDE_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+              <option key={value} value={value}>
+                {label}
+              </option>
             ))}
           </select>
           <select
@@ -341,42 +253,34 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Slide table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Table header */}
-        <div className="grid grid-cols-[40px_140px_1fr_80px_60px_70px] items-center gap-3 px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          <span></span>
-          <span>Tipo</span>
-          <span>Título</span>
-          <span className="text-center">Duração</span>
-          <span className="text-center">Ativo</span>
-          <span className="text-center">Ações</span>
-        </div>
-
-        {/* Slide list */}
-        {loading ? (
-          <div className="text-center py-12 text-gray-500 text-sm">A carregar slides...</div>
-        ) : slides.length === 0 ? (
-          <div className="text-center py-12">
-            <PlusCircle size={36} className="mx-auto text-gray-300 mb-2" />
-            <p className="text-gray-500 text-sm">Nenhum slide encontrado</p>
+      {/* Slide list */}
+      {loading ? (
+        <div className="text-center py-12 text-gray-500">A carregar slides...</div>
+      ) : slides.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+          <div className="text-gray-400 mb-3">
+            <PlusCircle size={48} className="mx-auto" />
           </div>
-        ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={slides.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+          <p className="text-gray-600 font-medium">Nenhum slide encontrado</p>
+          <p className="text-gray-400 text-sm mt-1">Crie o primeiro slide para começar</p>
+        </div>
+      ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={slides.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
               {slides.map((slide) => (
                 <SortableSlide
                   key={slide.id}
                   slide={slide}
+                  onEdit={(id) => navigate(`/slides/${id}`)}
                   onDelete={setDeleteTarget}
                   onToggle={handleToggle}
-                  onUpdate={handleUpdate}
                 />
               ))}
-            </SortableContext>
-          </DndContext>
-        )}
-      </div>
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
 
       {/* Delete confirmation dialog */}
       {deleteTarget && (
@@ -390,7 +294,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-sm text-gray-600 mb-6">
               Tem a certeza que pretende eliminar o slide{' '}
-              <strong>"{deleteTarget.title}"</strong>?
+              <strong>"{deleteTarget.title}"</strong>? Esta ação não pode ser revertida.
             </p>
             <div className="flex gap-3 justify-end">
               <button
