@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, type FormEvent, type ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Save, X, Upload, Trash2, Image } from 'lucide-react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import type { SlideType, WPCategory } from '../types';
 import {
   getSlide,
@@ -345,14 +347,13 @@ export default function SlideEditPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Conteúdo HTML
+                Conteúdo
               </label>
-              <textarea
+              <ReactQuill
+                theme="snow"
                 value={content.htmlContent || ''}
-                onChange={(e) => handleContentChange('htmlContent', e.target.value)}
-                rows={6}
-                placeholder="<p>Informações para visitantes...</p>"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none font-mono"
+                onChange={(val) => handleContentChange('htmlContent', val)}
+                modules={{ toolbar: [['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], [{ header: [2, 3, false] }], ['link'], ['clean']] }}
               />
             </div>
             {renderImageUploader(
@@ -369,14 +370,13 @@ export default function SlideEditPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Conteúdo HTML
+                Conteúdo
               </label>
-              <textarea
+              <ReactQuill
+                theme="snow"
                 value={content.htmlContent || ''}
-                onChange={(e) => handleContentChange('htmlContent', e.target.value)}
-                rows={8}
-                placeholder="<p>Informações de serviços...</p>"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none font-mono"
+                onChange={(val) => handleContentChange('htmlContent', val)}
+                modules={{ toolbar: [['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], [{ header: [2, 3, false] }], ['link'], ['clean']] }}
               />
             </div>
           </div>
@@ -387,14 +387,13 @@ export default function SlideEditPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Conteúdo HTML
+                Conteúdo
               </label>
-              <textarea
+              <ReactQuill
+                theme="snow"
                 value={content.htmlContent || ''}
-                onChange={(e) => handleContentChange('htmlContent', e.target.value)}
-                rows={6}
-                placeholder="<h2>Texto do anúncio</h2>"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none font-mono"
+                onChange={(val) => handleContentChange('htmlContent', val)}
+                modules={{ toolbar: [['bold', 'italic', 'underline'], [{ list: 'ordered' }, { list: 'bullet' }], [{ header: [2, 3, false] }], ['link'], ['clean']] }}
               />
             </div>
             <div>
