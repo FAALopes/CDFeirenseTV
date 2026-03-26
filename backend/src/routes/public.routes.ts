@@ -39,11 +39,19 @@ router.get(
         }
         if (slide.type === 'single_news') {
           const content = slide.content as any;
-          const articleIndex = content?.articleIndex || 0;
+          const articleUrl = content?.articleUrl || '';
           try {
-            const posts = await wordpressService.getPosts(20);
-            const article = posts[articleIndex] || posts[0] || null;
-            return { ...slide, content: { ...content, article } };
+            if (articleUrl) {
+              // Extract slug from URL: https://cdfeirense.pt/my-article/ -> my-article
+              const slug = articleUrl.replace(/\/$/, '').split('/').pop() || '';
+              const article = await wordpressService.getPostBySlug(slug);
+              return { ...slide, content: { ...content, article } };
+            } else {
+              // Fallback: show latest article
+              const posts = await wordpressService.getPosts(1);
+              const article = posts[0] || null;
+              return { ...slide, content: { ...content, article } };
+            }
           } catch {
             return slide;
           }

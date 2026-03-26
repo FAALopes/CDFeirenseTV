@@ -223,18 +223,17 @@ export default function SlideEditPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Posição do artigo (0 = mais recente)
+                Link do artigo
               </label>
               <input
-                type="number"
-                min={0}
-                max={19}
-                value={content.articleIndex || 0}
-                onChange={(e) => handleContentChange('articleIndex', parseInt(e.target.value) || 0)}
+                type="url"
+                placeholder="https://cdfeirense.pt/nome-do-artigo/"
+                value={content.articleUrl || ''}
+                onChange={(e) => handleContentChange('articleUrl', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none"
               />
               <p className="text-xs text-gray-500 mt-1">
-                0 = artigo mais recente, 1 = segundo mais recente, etc.
+                Cola aqui o link do artigo do site cdfeirense.pt
               </p>
             </div>
           </div>

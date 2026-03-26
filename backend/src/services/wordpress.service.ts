@@ -93,6 +93,52 @@ export class WordPressService {
     }
   }
 
+  async getPostBySlug(slug: string): Promise<WPPost | null> {
+    const wpUrl = await getWpApiUrl();
+
+    const cacheKey = `wp_post_slug_${slug}`;
+    const cached = getCached<WPPost>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const url = `${wpUrl}/posts?slug=${encodeURIComponent(slug)}&_embed`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`WordPress API error: ${response.status}`);
+      }
+
+      const rawPosts: any[] = (await response.json()) as any[];
+      if (rawPosts.length === 0) return null;
+
+      const post = rawPosts[0];
+      let featuredImage: string | null = null;
+      try {
+        featuredImage =
+          post._embedded?.['wp:featuredmedia']?.[0]?.media_details?.sizes?.large?.source_url ||
+          post._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+          null;
+      } catch {
+        // no featured image
+      }
+
+      const result: WPPost = {
+        id: post.id,
+        title: post.title?.rendered || '',
+        excerpt: post.excerpt?.rendered || '',
+        featuredImage,
+        date: post.date,
+        link: post.link,
+      };
+
+      setCache(cacheKey, result);
+      return result;
+    } catch (err: any) {
+      console.error('Error fetching WordPress post by slug:', err.message);
+      return null;
+    }
+  }
+
   async getCategories(): Promise<WPCategory[]> {
     const wpUrl = await getWpApiUrl();
 
