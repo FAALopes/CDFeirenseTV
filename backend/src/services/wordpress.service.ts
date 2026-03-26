@@ -45,19 +45,20 @@ async function getWpApiUrl(): Promise<string> {
 }
 
 export class WordPressService {
-  async getPosts(count?: number, categoryId?: number | null): Promise<WPPost[]> {
+  async getPosts(count?: number, categoryIds?: number[] | null): Promise<WPPost[]> {
     const wpUrl = await getWpApiUrl();
     const countSetting = await prisma.setting.findUnique({ where: { key: 'newsAutoFetchCount' } });
     const perPage = count || parseInt(countSetting?.value || '10', 10);
 
-    const cacheKey = `wp_posts_${perPage}_cat_${categoryId || 'all'}`;
+    const catKey = categoryIds && categoryIds.length > 0 ? categoryIds.sort().join(',') : 'all';
+    const cacheKey = `wp_posts_${perPage}_cat_${catKey}`;
     const cached = getCached<WPPost[]>(cacheKey);
     if (cached) return cached;
 
     try {
       let url = `${wpUrl}/posts?per_page=${perPage}&_embed&orderby=date&order=desc`;
-      if (categoryId) {
-        url += `&categories=${categoryId}`;
+      if (categoryIds && categoryIds.length > 0) {
+        url += `&categories=${categoryIds.join(',')}`;
       }
       const response = await fetch(url);
 

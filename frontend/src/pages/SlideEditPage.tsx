@@ -197,23 +197,44 @@ export default function SlideEditPage() {
               </label>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Filtrar por categoria
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por categorias
               </label>
-              <select
-                value={content.categoryId || ''}
-                onChange={(e) =>
-                  handleContentChange('categoryId', e.target.value ? Number(e.target.value) : null)
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none bg-white"
-              >
-                <option value="">Todas as categorias</option>
-                {wpCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name} ({cat.count})
-                  </option>
-                ))}
-              </select>
+              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-1 bg-white">
+                {wpCategories.map((cat) => {
+                  const categoryIds: number[] = content.categoryIds || (content.categoryId ? [content.categoryId] : []);
+                  const isChecked = categoryIds.includes(cat.id);
+                  return (
+                    <label key={cat.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {
+                          const newIds = isChecked
+                            ? categoryIds.filter((id: number) => id !== cat.id)
+                            : [...categoryIds, cat.id];
+                          handleContentChange('categoryIds', newIds.length > 0 ? newIds : null);
+                          handleContentChange('categoryId', null);
+                        }}
+                        className="w-4 h-4 text-cdf-600 rounded focus:ring-cdf-500"
+                      />
+                      <span className="text-sm text-gray-700">{cat.name} ({cat.count})</span>
+                    </label>
+                  );
+                })}
+                {wpCategories.length === 0 && (
+                  <p className="text-xs text-gray-400 px-2 py-1">Sem categorias disponíveis</p>
+                )}
+              </div>
+              {((content.categoryIds && content.categoryIds.length > 0) || content.categoryId) && (
+                <button
+                  type="button"
+                  onClick={() => { handleContentChange('categoryIds', null); handleContentChange('categoryId', null); }}
+                  className="mt-1 text-xs text-cdf-600 hover:text-cdf-800"
+                >
+                  Limpar seleção (mostrar todas)
+                </button>
+              )}
             </div>
           </div>
         );
