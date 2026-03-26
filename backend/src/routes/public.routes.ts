@@ -30,8 +30,9 @@ router.get(
         if (slide.type === 'news') {
           const content = slide.content as any;
           const count = content?.count || 5;
+          const categoryId = content?.categoryId || null;
           try {
-            const posts = await wordpressService.getPosts(count);
+            const posts = await wordpressService.getPosts(count, categoryId);
             return { ...slide, content: { ...content, posts } };
           } catch {
             return slide;
