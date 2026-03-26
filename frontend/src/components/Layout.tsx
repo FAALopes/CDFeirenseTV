@@ -142,16 +142,7 @@ export default function Layout() {
             </button>
             <h2 className="text-lg font-semibold text-gray-800">{getPageTitle()}</h2>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 hidden sm:inline">{user?.name}</span>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut size={18} />
-              <span className="hidden sm:inline">Sair</span>
-            </button>
-          </div>
+          <span className="text-sm text-gray-500 hidden sm:inline">{user?.name}</span>
         </header>
 
         {/* Page content */}
