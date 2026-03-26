@@ -220,7 +220,7 @@ function NewsSlide({ slide }: { slide: Slide }) {
                 <img
                   src={post.featuredImage}
                   alt={post.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
             )}
@@ -466,7 +466,7 @@ function SingleNewsSlide({ slide }: { slide: Slide }) {
             <img
               src={article.featuredImage}
               alt={cleanTitle}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-top"
             />
           </div>
         )}
