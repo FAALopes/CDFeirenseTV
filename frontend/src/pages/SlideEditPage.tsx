@@ -200,43 +200,43 @@ export default function SlideEditPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar por categorias
+                Categorias
               </label>
-              <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-2 space-y-1 bg-white">
+              <div className="flex flex-wrap gap-2">
                 {wpCategories.map((cat) => {
                   const categoryIds: number[] = content.categoryIds || (content.categoryId ? [content.categoryId] : []);
-                  const isChecked = categoryIds.includes(cat.id);
+                  const isSelected = categoryIds.includes(cat.id);
                   return (
-                    <label key={cat.id} className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {
-                          const newIds = isChecked
-                            ? categoryIds.filter((id: number) => id !== cat.id)
-                            : [...categoryIds, cat.id];
-                          handleContentChange('categoryIds', newIds.length > 0 ? newIds : null);
-                          handleContentChange('categoryId', null);
-                        }}
-                        className="w-4 h-4 text-cdf-600 rounded focus:ring-cdf-500"
-                      />
-                      <span className="text-sm text-gray-700">{cat.name} ({cat.count})</span>
-                    </label>
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        const newIds = isSelected
+                          ? categoryIds.filter((id: number) => id !== cat.id)
+                          : [...categoryIds, cat.id];
+                        handleContentChange('categoryIds', newIds.length > 0 ? newIds : null);
+                        handleContentChange('categoryId', null);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                        isSelected
+                          ? 'bg-cdf-600 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
                   );
                 })}
-                {wpCategories.length === 0 && (
-                  <p className="text-xs text-gray-400 px-2 py-1">Sem categorias disponíveis</p>
-                )}
               </div>
-              {((content.categoryIds && content.categoryIds.length > 0) || content.categoryId) && (
-                <button
-                  type="button"
-                  onClick={() => { handleContentChange('categoryIds', null); handleContentChange('categoryId', null); }}
-                  className="mt-1 text-xs text-cdf-600 hover:text-cdf-800"
-                >
-                  Limpar seleção (mostrar todas)
-                </button>
+              {wpCategories.length === 0 && (
+                <p className="text-xs text-gray-400 mt-1">Sem categorias disponíveis</p>
               )}
+              <p className="text-xs text-gray-400 mt-2">
+                {(() => {
+                  const ids: number[] = content.categoryIds || (content.categoryId ? [content.categoryId] : []);
+                  return ids.length === 0 ? 'Todas as categorias' : `${ids.length} selecionada${ids.length > 1 ? 's' : ''}`;
+                })()}
+              </p>
             </div>
           </div>
         );
