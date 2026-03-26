@@ -106,8 +106,8 @@ export default function Layout() {
           </a>
         </nav>
 
-        {/* User info at bottom */}
-        <div className="px-4 py-4 border-t border-cdf-800">
+        {/* User info & logout at bottom */}
+        <div className="px-4 py-4 border-t border-cdf-800 space-y-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-cdf-700 flex items-center justify-center flex-shrink-0">
               <span className="text-xs font-bold text-white">
@@ -119,6 +119,13 @@ export default function Layout() {
               <p className="text-xs text-cdf-400 truncate">{user?.role}</p>
             </div>
           </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-300 hover:bg-red-900/30 hover:text-red-200 transition-colors"
+          >
+            <LogOut size={20} />
+            Sair
+          </button>
         </div>
       </aside>
 
