@@ -186,18 +186,6 @@ export default function SlideEditPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="autoFetch"
-                checked={content.autoFetch ?? true}
-                onChange={(e) => handleContentChange('autoFetch', e.target.checked)}
-                className="w-4 h-4 text-cdf-600 rounded focus:ring-cdf-500"
-              />
-              <label htmlFor="autoFetch" className="text-sm text-gray-700">
-                Buscar automaticamente do WordPress
-              </label>
-            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Categorias
