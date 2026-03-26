@@ -24,9 +24,11 @@ import {
   Trash2,
   Search,
   AlertTriangle,
+  Check,
+  X,
 } from 'lucide-react';
 import type { Slide, SlideType } from '../types';
-import { getSlides, deleteSlide, reorderSlides, toggleSlide } from '../services/api';
+import { getSlides, deleteSlide, reorderSlides, toggleSlide, updateSlide } from '../services/api';
 
 const SLIDE_TYPE_LABELS: Record<SlideType, string> = {
   news: 'Notícias',
@@ -55,17 +57,38 @@ interface SortableSlideProps {
   onEdit: (id: number) => void;
   onDelete: (slide: Slide) => void;
   onToggle: (id: number) => void;
+  onUpdate: (id: number, data: Partial<Slide>) => void;
 }
 
-function SortableSlide({ slide, onEdit, onDelete, onToggle }: SortableSlideProps) {
+function SortableSlide({ slide, onEdit, onDelete, onToggle, onUpdate }: SortableSlideProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: slide.id,
   });
+
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [editingDuration, setEditingDuration] = useState(false);
+  const [titleValue, setTitleValue] = useState(slide.title);
+  const [durationValue, setDurationValue] = useState(slide.duration);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  const saveTitle = () => {
+    if (titleValue.trim() && titleValue !== slide.title) {
+      onUpdate(slide.id, { title: titleValue.trim() });
+    }
+    setEditingTitle(false);
+  };
+
+  const saveDuration = () => {
+    const val = Math.max(1, Math.min(300, durationValue));
+    if (val !== slide.duration) {
+      onUpdate(slide.id, { duration: val });
+    }
+    setEditingDuration(false);
   };
 
   return (
@@ -85,7 +108,7 @@ function SortableSlide({ slide, onEdit, onDelete, onToggle }: SortableSlideProps
         <GripVertical size={20} />
       </button>
 
-      {/* Active toggle - moved to beginning */}
+      {/* Active toggle */}
       <button
         onClick={() => onToggle(slide.id)}
         className={`toggle-switch ${slide.isActive ? 'toggle-switch-checked' : 'toggle-switch-unchecked'}`}
@@ -103,11 +126,55 @@ function SortableSlide({ slide, onEdit, onDelete, onToggle }: SortableSlideProps
         {SLIDE_TYPE_LABELS[slide.type]}
       </span>
 
-      {/* Title & Duration */}
+      {/* Title - inline editable */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-gray-800 truncate">{slide.title}</h3>
-        <p className="text-sm text-gray-500">{slide.duration}s</p>
+        {editingTitle ? (
+          <div className="flex items-center gap-1">
+            <input
+              autoFocus
+              value={titleValue}
+              onChange={(e) => setTitleValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') saveTitle(); if (e.key === 'Escape') { setTitleValue(slide.title); setEditingTitle(false); } }}
+              className="flex-1 px-2 py-1 text-sm font-medium border border-cdf-300 rounded outline-none focus:ring-1 focus:ring-cdf-500"
+            />
+            <button onClick={saveTitle} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check size={16} /></button>
+            <button onClick={() => { setTitleValue(slide.title); setEditingTitle(false); }} className="p-1 text-gray-400 hover:bg-gray-100 rounded"><X size={16} /></button>
+          </div>
+        ) : (
+          <h3
+            onClick={() => setEditingTitle(true)}
+            className="font-medium text-gray-800 truncate cursor-pointer hover:text-cdf-600"
+            title="Clique para editar"
+          >
+            {slide.title}
+          </h3>
+        )}
       </div>
+
+      {/* Duration - inline editable, same font size */}
+      {editingDuration ? (
+        <div className="flex items-center gap-1">
+          <input
+            autoFocus
+            type="number"
+            min={1}
+            max={300}
+            value={durationValue}
+            onChange={(e) => setDurationValue(parseInt(e.target.value) || 1)}
+            onKeyDown={(e) => { if (e.key === 'Enter') saveDuration(); if (e.key === 'Escape') { setDurationValue(slide.duration); setEditingDuration(false); } }}
+            className="w-16 px-2 py-1 text-sm font-medium border border-cdf-300 rounded outline-none focus:ring-1 focus:ring-cdf-500 text-center"
+          />
+          <button onClick={saveDuration} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check size={16} /></button>
+        </div>
+      ) : (
+        <span
+          onClick={() => setEditingDuration(true)}
+          className="text-sm font-medium text-gray-500 cursor-pointer hover:text-cdf-600 whitespace-nowrap"
+          title="Clique para editar"
+        >
+          {slide.duration}s
+        </span>
+      )}
 
       {/* Actions */}
       <div className="flex items-center gap-1">
@@ -183,6 +250,15 @@ export default function DashboardPage() {
   const handleToggle = async (id: number) => {
     try {
       const updated = await toggleSlide(id);
+      setSlides((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleUpdate = async (id: number, data: Partial<Slide>) => {
+    try {
+      const updated = await updateSlide(id, data);
       setSlides((prev) => prev.map((s) => (s.id === id ? updated : s)));
     } catch {
       // ignore
@@ -275,6 +351,7 @@ export default function DashboardPage() {
                   onEdit={(id) => navigate(`/slides/${id}`)}
                   onDelete={setDeleteTarget}
                   onToggle={handleToggle}
+                  onUpdate={handleUpdate}
                 />
               ))}
             </div>
