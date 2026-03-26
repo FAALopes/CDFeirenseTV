@@ -135,15 +135,22 @@ export default function TVPage() {
         </div>
       </div>
 
-      {/* Slide progress dots */}
+      {/* Slide progress dots - clickable */}
       {slides.length > 1 && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-50">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-50">
           {slides.map((_, idx) => (
-            <div
+            <button
               key={idx}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                idx === currentIndex ? 'bg-cdf-400' : 'bg-white bg-opacity-30'
+              onClick={() => {
+                if (timerRef.current) clearTimeout(timerRef.current);
+                setCurrentIndex(idx);
+              }}
+              className={`rounded-full transition-all duration-300 cursor-pointer hover:scale-150 ${
+                idx === currentIndex
+                  ? 'w-4 h-4 bg-cdf-400 ring-2 ring-white ring-opacity-50'
+                  : 'w-3 h-3 bg-white bg-opacity-40 hover:bg-opacity-70'
               }`}
+              title={slides[idx]?.title || `Slide ${idx + 1}`}
             />
           ))}
         </div>
