@@ -2,6 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Slide, Settings, WPPost } from '../types';
 import { getTVSlides, getTVSettings } from '../services/api';
 
+// Strip HTML tags and decode HTML entities (&nbsp;, &hellip;, etc.)
+function stripHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+}
+
 export default function TVPage() {
   const [slides, setSlides] = useState<Slide[]>([]);
   const [settings, setSettings] = useState<Settings>({});
@@ -220,9 +226,9 @@ function NewsSlide({ slide }: { slide: Slide }) {
             )}
             <div className="p-4 flex-1 flex flex-col">
               <h3 className="text-white font-semibold text-sm leading-tight mb-2 line-clamp-2">
-                {post.title}
+                {stripHtml(post.title)}
               </h3>
-              <p className="text-cdf-200 text-xs line-clamp-3 flex-1">{post.excerpt}</p>
+              <p className="text-cdf-200 text-xs line-clamp-3 flex-1">{stripHtml(post.excerpt)}</p>
               <p className="text-cdf-400 text-xs mt-2">
                 {new Date(post.date).toLocaleDateString('pt-PT')}
               </p>
@@ -434,8 +440,8 @@ function SingleNewsSlide({ slide }: { slide: Slide }) {
     );
   }
 
-  // Strip HTML tags from excerpt
-  const cleanExcerpt = article.excerpt?.replace(/<[^>]*>/g, '').trim() || '';
+  const cleanExcerpt = stripHtml(article.excerpt || '');
+  const cleanTitle = stripHtml(article.title || '');
 
   return (
     <div className="w-full h-full bg-gradient-to-br from-cdf-900 via-cdf-800 to-cdf-900 flex flex-col">
@@ -459,7 +465,7 @@ function SingleNewsSlide({ slide }: { slide: Slide }) {
           <div className="w-1/2 h-full">
             <img
               src={article.featuredImage}
-              alt={article.title}
+              alt={cleanTitle}
               className="w-full h-full object-cover"
             />
           </div>
@@ -468,7 +474,7 @@ function SingleNewsSlide({ slide }: { slide: Slide }) {
         {/* Text content */}
         <div className={`${article.featuredImage ? 'w-1/2' : 'w-full'} flex flex-col justify-center p-10`}>
           <h1 className="text-white text-4xl md:text-5xl font-bold leading-tight mb-6">
-            {article.title}
+            {cleanTitle}
           </h1>
           <p className="text-cdf-200 text-xl md:text-2xl leading-relaxed mb-8">
             {cleanExcerpt}
