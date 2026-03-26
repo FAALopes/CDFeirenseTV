@@ -13,6 +13,7 @@ import {
 
 const SLIDE_TYPES: { value: SlideType; label: string }[] = [
   { value: 'news', label: 'Notícias' },
+  { value: 'single_news', label: 'Notícia em Destaque' },
   { value: 'game', label: 'Jogo' },
   { value: 'complex_map', label: 'Mapa Complexo' },
   { value: 'visitor_info', label: 'Info Visitante' },
@@ -213,6 +214,28 @@ export default function SlideEditPage() {
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+        );
+
+      case 'single_news':
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Posição do artigo (0 = mais recente)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={19}
+                value={content.articleIndex || 0}
+                onChange={(e) => handleContentChange('articleIndex', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-cdf-500 focus:border-cdf-500 outline-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                0 = artigo mais recente, 1 = segundo mais recente, etc.
+              </p>
             </div>
           </div>
         );
@@ -578,6 +601,25 @@ function SlidePreview({
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      );
+
+    case 'single_news':
+      return (
+        <div className="p-3 h-full flex flex-col">
+          <div className="text-cdf-400 text-[8px] font-bold uppercase tracking-wider mb-1">
+            Notícia em Destaque
+          </div>
+          <h3 className="text-white text-xs font-bold mb-2">{previewTitle}</h3>
+          <div className="flex-1 flex gap-2">
+            <div className="w-1/2 bg-gray-700 rounded" />
+            <div className="w-1/2 space-y-1">
+              <div className="h-2 bg-gray-600 rounded w-3/4" />
+              <div className="h-1.5 bg-gray-700 rounded w-full" />
+              <div className="h-1.5 bg-gray-700 rounded w-2/3" />
+              <div className="mt-2 h-1 bg-cdf-600 rounded w-1/2" />
+            </div>
           </div>
         </div>
       );

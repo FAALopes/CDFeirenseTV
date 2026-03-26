@@ -163,6 +163,8 @@ function SlideRenderer({ slide }: { slide: Slide }) {
   switch (slide.type) {
     case 'news':
       return <NewsSlide slide={slide} />;
+    case 'single_news':
+      return <SingleNewsSlide slide={slide} />;
     case 'game':
       return <GameSlide slide={slide} />;
     case 'complex_map':
@@ -417,6 +419,73 @@ function AnnouncementSlide({ slide }: { slide: Slide }) {
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       )}
+    </div>
+  );
+}
+
+function SingleNewsSlide({ slide }: { slide: Slide }) {
+  const article = slide.content?.article;
+
+  if (!article) {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-cdf-900 to-cdf-800 flex items-center justify-center">
+        <p className="text-cdf-300 text-2xl">Sem notícia disponível</p>
+      </div>
+    );
+  }
+
+  // Strip HTML tags from excerpt
+  const cleanExcerpt = article.excerpt?.replace(/<[^>]*>/g, '').trim() || '';
+
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-cdf-900 via-cdf-800 to-cdf-900 flex flex-col">
+      {/* Header bar */}
+      <div className="flex items-center gap-4 px-8 py-5 bg-cdf-900 bg-opacity-60">
+        <div className="w-12 h-12 rounded-full bg-cdf-600 flex items-center justify-center flex-shrink-0">
+          <span className="text-white font-bold text-lg">CDF</span>
+        </div>
+        <div>
+          <p className="text-cdf-400 text-sm uppercase tracking-widest font-semibold">Notícia em Destaque</p>
+          <p className="text-cdf-300 text-xs">
+            {new Date(article.date).toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Image */}
+        {article.featuredImage && (
+          <div className="w-1/2 h-full">
+            <img
+              src={article.featuredImage}
+              alt={article.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        {/* Text content */}
+        <div className={`${article.featuredImage ? 'w-1/2' : 'w-full'} flex flex-col justify-center p-10`}>
+          <h1 className="text-white text-4xl md:text-5xl font-bold leading-tight mb-6">
+            {article.title}
+          </h1>
+          <p className="text-cdf-200 text-xl md:text-2xl leading-relaxed mb-8">
+            {cleanExcerpt}
+          </p>
+
+          {/* Link / QR hint */}
+          <div className="flex items-center gap-3 mt-auto">
+            <div className="w-3 h-3 rounded-full bg-cdf-400 animate-pulse" />
+            <p className="text-cdf-400 text-lg font-medium">
+              Leia mais em <span className="text-white font-bold underline">{article.link?.replace('https://', '')}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom accent bar */}
+      <div className="h-1.5 bg-gradient-to-r from-cdf-600 via-cdf-400 to-cdf-600" />
     </div>
   );
 }

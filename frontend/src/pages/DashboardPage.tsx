@@ -30,6 +30,7 @@ import { getSlides, deleteSlide, reorderSlides, toggleSlide } from '../services/
 
 const SLIDE_TYPE_LABELS: Record<SlideType, string> = {
   news: 'Notícias',
+  single_news: 'Notícia Destaque',
   game: 'Jogo',
   complex_map: 'Mapa Complexo',
   visitor_info: 'Info Visitante',
@@ -40,6 +41,7 @@ const SLIDE_TYPE_LABELS: Record<SlideType, string> = {
 
 const SLIDE_TYPE_COLORS: Record<SlideType, string> = {
   news: 'bg-blue-100 text-blue-800',
+  single_news: 'bg-indigo-100 text-indigo-800',
   game: 'bg-green-100 text-green-800',
   complex_map: 'bg-purple-100 text-purple-800',
   visitor_info: 'bg-orange-100 text-orange-800',

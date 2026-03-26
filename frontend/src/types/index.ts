@@ -10,6 +10,7 @@ export interface User {
 
 export type SlideType =
   | 'news'
+  | 'single_news'
   | 'game'
   | 'complex_map'
   | 'visitor_info'

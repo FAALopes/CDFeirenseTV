@@ -24,7 +24,7 @@ router.get(
       orderBy: { ordering: 'asc' },
     });
 
-    // Merge WordPress news data for news-type slides
+    // Merge WordPress news data for news-type and single_news slides
     const enrichedSlides = await Promise.all(
       slides.map(async (slide) => {
         if (slide.type === 'news') {
@@ -33,6 +33,17 @@ router.get(
           try {
             const posts = await wordpressService.getPosts(count);
             return { ...slide, content: { ...content, posts } };
+          } catch {
+            return slide;
+          }
+        }
+        if (slide.type === 'single_news') {
+          const content = slide.content as any;
+          const articleIndex = content?.articleIndex || 0;
+          try {
+            const posts = await wordpressService.getPosts(20);
+            const article = posts[articleIndex] || posts[0] || null;
+            return { ...slide, content: { ...content, article } };
           } catch {
             return slide;
           }
