@@ -1,0 +1,66 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  user
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+enum SlideType {
+  news
+  game
+  complex_map
+  visitor_info
+  services
+  announcement
+  sponsor
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  username     String     @unique
+  name         String
+  email        String?
+  passwordHash String     @map("password_hash")
+  role         UserRole   @default(user)
+  status       UserStatus @default(active)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Slide {
+  id        Int       @id @default(autoincrement())
+  type      SlideType
+  title     String
+  content   Json
+  duration  Int       @default(10)
+  ordering  Int       @default(0)
+  isActive  Boolean   @default(true) @map("is_active")
+  imageUrl  String?   @map("image_url")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("slides")
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}
